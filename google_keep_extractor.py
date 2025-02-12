@@ -3,6 +3,8 @@ from __future__ import annotations
 import dataclasses
 import json
 import pathlib
+import re
+import shutil
 from datetime import datetime
 
 EXPORT_TIME = datetime.now()
@@ -22,16 +24,20 @@ JSON_NOTE_TEXT = 'textContent'
 class Note:
     title: str
     text: str
+    attachments: list[str] = dataclasses.field(default_factory=list)
+    labels: list[str] = dataclasses.field(default_factory=list)
 
 
 def main():
     EXPORT_PATH.parent.mkdir(exist_ok=True)
-    with open(EXPORT_PATH, 'w', encoding='utf-8') as file:
-        file.write(_get_md_header())
-        for note in _load_notes(IMPORT_PATH):
+    for note in _load_notes(IMPORT_PATH):
+        sanitized_title = re.sub(r'[^\w\-_\. ]', '_', note.title)
+        note_export_path = EXPORT_PATH.parent / f"{sanitized_title}.md"
+        with open(note_export_path, 'w', encoding='utf-8') as file:
             file.write(_note_to_str(note))
+        _copy_attachments(note)
+        print(f'File {note_export_path} saved.')
     print('Export successful!')
-    print(f'File {EXPORT_PATH} saved.')
 
 
 def _get_md_header() -> str:
@@ -46,6 +52,8 @@ def _load_notes(folder: pathlib.Path) -> list[Note]:
                 notes.append(_load_note(item))
             except RuntimeError as err:
                 print(f"Skipping note: '{err}'")
+            except Exception as e:
+                print(f"Error processing file {item}: {e}")
     return sorted(notes, key=lambda x: x.title.lower(), reverse=True)
 
 
@@ -57,7 +65,12 @@ def _load_note(path: pathlib.Path) -> Note:
                 f"Note '{note_obj[JSON_NOTE_TITLE]}' "
                 f"from file '{path}' is trashed"
             )
-        return Note(title=_get_title(note_obj), text=_get_text(note_obj))
+        return Note(
+            title=_get_title(note_obj),
+            text=_get_text(note_obj),
+            attachments=_get_attachments(note_obj),
+            labels=_get_labels(note_obj)
+        )
 
 
 def _get_title(note: dict[str, object]) -> str:
@@ -85,13 +98,12 @@ def _get_title(note: dict[str, object]) -> str:
 
 
 def _get_text(note: dict[str, object]) -> str:
-    try:
+    if JSON_NOTE_TEXT in note:
         text = note[JSON_NOTE_TEXT]
         if not isinstance(text, str):
             raise NotImplementedError
-        else:
-            return text
-    except KeyError:
+        return text
+    elif 'listContent' in note:
         items = []
         print(
             f"Note '{note[JSON_NOTE_TITLE]}' "
@@ -103,11 +115,41 @@ def _get_text(note: dict[str, object]) -> str:
             checkbox = '[x]' if item['isChecked'] else '[ ]'
             items.append(f"* {checkbox} {item['text']}")
         return '\n'.join(items) + '\n'
+    else:
+        print(f"Note '{note[JSON_NOTE_TITLE]}' doesn't have 'textContent' or 'listContent'.")
+        return ""
+
+
+def _get_attachments(note: dict[str, object]) -> list[str]:
+    if 'attachments' in note:
+        return [attachment['filePath'] for attachment in note['attachments']]
+    return []
+
+
+def _get_labels(note: dict[str, object]) -> list[str]:
+    if 'labels' in note:
+        return [label['name'] for label in note['labels']]
+    return []
 
 
 def _note_to_str(note: Note) -> str:
     """Creates a single Markdown note"""
-    return f'## {note.title}\n\n{note.text}\n\n---\n\n'
+    attachments_str = '\n'.join(
+        f'![{pathlib.Path(attachment).name}]({attachment})'
+        for attachment in note.attachments
+    )
+    labels_str = ', '.join(note.labels)
+    labels_line = f'\n\nLabels: {labels_str}' if labels_str else ''
+    return f'## {note.title}\n\n{note.text}\n\n{attachments_str}{labels_line}\n\n---\n\n'
+
+
+def _copy_attachments(note: Note):
+    for attachment in note.attachments:
+        src_path = IMPORT_PATH / attachment
+        dest_path = EXPORT_PATH.parent / attachment
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(src_path, dest_path)
+        print(f'Copied attachment {src_path} to {dest_path}')
 
 
 if __name__ == '__main__':
