@@ -140,7 +140,7 @@ def _note_to_str(note: Note) -> str:
     Ends note content with a single newline as in common Unix standard.
     """
     attachments_str = '\n'.join(
-        f'![{pathlib.Path(attachment).name}]({attachment})'
+        f'![{pathlib.Path(attachment).name}](attachments/{attachment})'
         for attachment in note.attachments
     )
     labels_str = f'Labels: {", ".join(note.labels)}' if note.labels else ''
@@ -156,10 +156,10 @@ def _note_to_str(note: Note) -> str:
 def _copy_attachments(note: Note):
     for attachment in note.attachments:
         src_path = IMPORT_PATH / attachment
-        dest_path = EXPORT_PATH.parent / attachment
+        dest_path = EXPORT_PATH.parent / 'attachments' / attachment
         dest_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(src_path, dest_path)
-        print(f'Copied attachment {src_path} to {dest_path}')
+        print(f'Copied attachment `{src_path}` to `{dest_path}`')
 
 
 if __name__ == '__main__':
