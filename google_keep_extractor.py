@@ -40,10 +40,6 @@ def main():
     print('Export successful!')
 
 
-def _get_md_header() -> str:
-    return ''
-
-
 def _load_notes(folder: pathlib.Path) -> list[Note]:
     notes = []
     for item in pathlib.Path(folder).iterdir():
