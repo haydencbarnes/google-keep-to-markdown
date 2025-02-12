@@ -1,7 +1,6 @@
 # Google Keep Extractor
 
-Parse JSON files from Keep export and convert them to a single
-structured Markdown file. Attachments and images are ignored.
+Parse JSON files from Keep export and convert them to Markdown files. Attachments and images are preserved.
 
 You can download Google Keep backup file by visiting:
 
@@ -22,6 +21,14 @@ Copy `Takeout` folder into root of this repo, and run the script:
 
 Python 3.8 or later is needed. No additional packages are required.
 
-After running the script, Markdown file with timestamp in filename is
-created in the `export` folder. This single file contains all notes
-separated with `---`.
+After running the script, Markdown files with timestamp in the filename are created and written to an `export` folder.
+
+## Main features
+
+- Writes individual `.md` files.
+- Includes attachments.
+- Writes Keep's Labels into the files.
+
+## Use Case
+
+Personally, I wanted to get these into Apple Notes. Notes supports RTFD imports of multiple files. I've used Bear (from the App Store) to import the Markdown files into it, and export RTF files. This was easier than tinkering with Pandoc.
