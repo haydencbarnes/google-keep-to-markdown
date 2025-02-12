@@ -33,7 +33,7 @@ def main():
         with open(note_export_path, 'w', encoding='utf-8') as file:
             file.write(_note_to_str(note))
         _copy_attachments(note)
-        print(f'File {note_export_path} saved.')
+        print(f'File `{note_export_path}` saved.')
     print('Export successful!')
 
 
@@ -44,7 +44,7 @@ def _load_notes(folder: pathlib.Path) -> list[Note]:
             try:
                 notes.append(_load_note(item))
             except Exception as err:
-                print(f"Error processing file {item}: {err}")
+                print(f"Error processing file `{item}`: `{err}`")
     return sorted(notes, key=lambda x: x.title.lower(), reverse=True)
 
 
@@ -97,7 +97,7 @@ def _get_text(note: dict[str, object]) -> str:
     elif JSON_NOTE_LIST in note:
         items = []
         print(
-            f"Note '{note[JSON_NOTE_TITLE]}' "
+            f"Note `{note[JSON_NOTE_TITLE]}` "
             "doesn't have text content. Converting..."
         )
         if not isinstance(note[JSON_NOTE_LIST], list):
@@ -107,8 +107,10 @@ def _get_text(note: dict[str, object]) -> str:
             items.append(f"* {checkbox} {item['text']}")
         return '\n'.join(items) + '\n'
     else:
-        print(f"Note '{note[JSON_NOTE_TITLE]}' doesn't have 'textContent' or 'listContent'.")
-        print(f"Note '{note[JSON_NOTE_TITLE]}' doesn't have 'textContent' or '{JSON_NOTE_LIST}'.")
+        print(
+            f"Note `{note[JSON_NOTE_TITLE]}` doesn't have `textContent` "
+            f"or `{JSON_NOTE_LIST}`. No text will be extracted."
+        )
         return ""
 
 
