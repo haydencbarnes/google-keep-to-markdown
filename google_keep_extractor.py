@@ -102,17 +102,14 @@ def _get_text(note: dict[str, object]) -> str:
         if not isinstance(text, str):
             raise NotImplementedError
         return text
-    elif 'listContent' in note:
     elif JSON_NOTE_LIST in note:
         items = []
         print(
             f"Note '{note[JSON_NOTE_TITLE]}' "
             "doesn't have text content. Converting..."
         )
-        if not isinstance(note['listContent'], list):
         if not isinstance(note[JSON_NOTE_LIST], list):
             raise NotImplementedError
-        for item in note['listContent']:
         for item in note[JSON_NOTE_LIST]:
             checkbox = '[x]' if item['isChecked'] else '[ ]'
             items.append(f"* {checkbox} {item['text']}")
