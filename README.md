@@ -23,12 +23,12 @@ Python 3.8 or later is needed. No additional packages are required.
 
 After running the script, Markdown files with timestamp in the filename are created and written to an `export` folder.
 
-## Main changes from forked repo:
+## Main features
 
 - Writes individual `.md` files.
 - Includes attachments.
 - Writes Keep's Labels into the files.
 
-# Use Case
+## Use Case
 
-Personally, I wanted to get these into Apple Notes. Notes supports RTFD imports of multiple files. I've used Bear (from the App Store) to import the Markdown files into it, and export RTF files. This was easier than tinkering with Pandoc. 
+Personally, I wanted to get these into Apple Notes. Notes supports RTFD imports of multiple files. I've used Bear (from the App Store) to import the Markdown files into it, and export RTF files. This was easier than tinkering with Pandoc.
