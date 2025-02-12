@@ -129,15 +129,28 @@ def _get_labels(note: dict[str, object]) -> list[str]:
 
 
 def _note_to_str(note: Note) -> str:
-    """Creates a single Markdown note"""
+    """Creates a single Markdown note from `Note` object.
+
+    If any note element is missing, it won't be included, and white-space is
+    adjusted.
+
+    Strips trailing white-space from each note element, so there's only a
+    single newline between them.
+
+    Ends note content with a single newline as in common Unix standard.
+    """
     attachments_str = '\n'.join(
         f'![{pathlib.Path(attachment).name}]({attachment})'
         for attachment in note.attachments
     )
-    labels_str = ', '.join(note.labels)
-    labels_line = f'\n\nLabels: {labels_str}' if labels_str else ''
-    labels_line = f'\n\nLabels: {labels_str}' if note.labels else ''
-    return f'## {note.title}\n\n{note.text}\n\n{attachments_str}{labels_line}\n\n---\n\n'
+    labels_str = f'Labels: {", ".join(note.labels)}' if note.labels else ''
+    all_elems = f'# {note.title}', note.text, attachments_str, labels_str
+    existing_elems = []
+    for elem in all_elems:
+        if elem:
+            existing_elems.append(elem.strip())
+    md_content = '\n\n'.join(existing_elems)
+    return md_content + '\n'
 
 
 def _copy_attachments(note: Note):
