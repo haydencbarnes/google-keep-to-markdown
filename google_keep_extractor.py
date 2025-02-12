@@ -47,10 +47,6 @@ def _load_notes(folder: pathlib.Path) -> list[Note]:
         if item.suffix == '.json':
             try:
                 notes.append(_load_note(item))
-            except RuntimeError as err:
-                print(f"Skipping note: '{err}'")
-            except Exception as e:
-                print(f"Error processing file {item}: {e}")
             except Exception as err:
                 print(f"Error processing file {item}: {err}")
     return sorted(notes, key=lambda x: x.title.lower(), reverse=True)
