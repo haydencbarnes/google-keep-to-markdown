@@ -7,14 +7,10 @@ import re
 import shutil
 from datetime import datetime
 
-EXPORT_TIME = datetime.now()
-FILE_TIME_FORMAT = '%Y-%m-%d_%H-%M-%S'
 TITLE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 IMPORT_PATH = pathlib.Path('Takeout/Keep')
-EXPORT_PATH = pathlib.Path(
-    f'export/export_{EXPORT_TIME.strftime(FILE_TIME_FORMAT)}.md'
-)
+EXPORT_PATH = pathlib.Path('export')
 
 JSON_NOTE_TITLE = 'title'
 JSON_NOTE_TEXT = 'textContent'
@@ -30,10 +26,10 @@ class Note:
 
 
 def main():
-    EXPORT_PATH.parent.mkdir(exist_ok=True)
+    EXPORT_PATH.mkdir(exist_ok=True)
     for note in _load_notes(IMPORT_PATH):
         sanitized_title = re.sub(r'[^\w\-_\. ]', '_', note.title)
-        note_export_path = EXPORT_PATH.parent / f"{sanitized_title}.md"
+        note_export_path = EXPORT_PATH/ f"{sanitized_title}.md"
         with open(note_export_path, 'w', encoding='utf-8') as file:
             file.write(_note_to_str(note))
         _copy_attachments(note)
@@ -156,7 +152,7 @@ def _note_to_str(note: Note) -> str:
 def _copy_attachments(note: Note):
     for attachment in note.attachments:
         src_path = IMPORT_PATH / attachment
-        dest_path = EXPORT_PATH.parent / 'attachments' / attachment
+        dest_path = EXPORT_PATH / 'attachments' / attachment
         dest_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(src_path, dest_path)
         print(f'Copied attachment `{src_path}` to `{dest_path}`')
