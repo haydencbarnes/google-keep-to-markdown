@@ -141,6 +141,7 @@ def _note_to_str(note: Note) -> str:
     )
     labels_str = ', '.join(note.labels)
     labels_line = f'\n\nLabels: {labels_str}' if labels_str else ''
+    labels_line = f'\n\nLabels: {labels_str}' if note.labels else ''
     return f'## {note.title}\n\n{note.text}\n\n{attachments_str}{labels_line}\n\n---\n\n'
 
 
